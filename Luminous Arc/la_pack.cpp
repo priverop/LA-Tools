@@ -1,5 +1,5 @@
-#include "HexTools.h"
-#include "BinaryTools.h"
+#include "../Tools/HexTools.h"
+#include "../Tools/BinaryTools.h"
 #include <iostream>
 #include <fstream>
 #include <stdio.h>
@@ -11,15 +11,6 @@ int main(int argc, char* argv[]){
 
   HexTools tools;
   BinaryTools bTools;
-
-
-  /*
-    - Creamos el .iear final.
-    - Abrir el fileList y recorrer.
-    - Por cada fichero:
-      - Se abre, y se escribe en el final.
-
-  */
 
   if(argc < 2){
     cout << "Not enough arguments." << endl;
@@ -54,11 +45,11 @@ int main(int argc, char* argv[]){
 
           if (fileToPack.is_open()){
             size = fileToPack.tellg();
-            char * fileContent = new char [size];
+            char * fileToPackContent = new char [size];
             fileToPack.seekg(0, ios::beg);
-            fileToPack.read(fileContent, size);
+            fileToPack.read(fileToPackContent, size);
             // Guardamos en el fichero completo
-            newIear.write(fileContent, size);
+            newIear.write(fileToPackContent, size);
           }
           else{
             std::cout << "Error opening " << fileName << '\n' << endl;
