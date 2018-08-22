@@ -20,7 +20,7 @@ int main(int argc, char* argv[]){
   }
   else{
     string inputFileName = argv[1];
-    ifstream inputFile;
+    ifstream inputFile; // File to unpack
     uint32_t size;
     const string folderName = "./extract";
     unsigned int block_number = 0;
@@ -34,6 +34,9 @@ int main(int argc, char* argv[]){
         size = inputFile.tellg();
         cout << "== LUMINOUS ARC EXTRACTOR by Nex ==" << endl << endl;
         cout << "Iniciando la extracción..." << endl << endl;
+
+        // Creamos un fichero de texto donde guardaremos todos los ficheros extraídos
+        ofstream fileList("fileList.txt");
 
         // Guardamos los primeros 4bytes tras la tabla de punteros para tomarlo como fin de bucle
         uint32_t first_pointer;
@@ -58,6 +61,7 @@ int main(int argc, char* argv[]){
 
           bTools.createBinaryFile(folderName + "/" + to_string(block_number) + " - " + "Header",
           string(header, offset));
+          fileList << folderName + "/" + to_string(block_number) + " - " + "Header" << endl;
 
           block_number++;
 
@@ -66,6 +70,7 @@ int main(int argc, char* argv[]){
 
           // Creamos fichero para la guardar la tabla de punteros
           ofstream pointer_table (folderName + "/" + to_string(block_number) + " - " +  "Pointer Table");
+          fileList << folderName + "/" + to_string(block_number) + " - " + "Pointer Table" << endl;
           cout << folderName + "/" + to_string(block_number) + " - " +  "Pointer Table" << " creado correctamente." << endl << endl;
 
           block_number++;
@@ -100,6 +105,8 @@ int main(int argc, char* argv[]){
             bTools.createBinaryFile(folderName + "/" + to_string(block_number) + " - " + fileName,
             string(block, block_size));
 
+            fileList << folderName + "/" + to_string(block_number) + " - " + fileName << endl;
+
             block_number++;
 
           } // while
@@ -117,6 +124,11 @@ int main(int argc, char* argv[]){
 
           bTools.createBinaryFile(folderName + "/" + to_string(block_number) + " - " + fileName,
           string(footer, footer_size));
+
+          fileList << folderName + "/" + to_string(block_number) + " - " + fileName << endl;
+
+          fileList.close();
+          cout << "fileList.txt creado correctamente" << endl;
 
         } // if mkdir
       } // if inputFile is_open
