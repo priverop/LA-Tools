@@ -12,8 +12,6 @@ int main(int argc, char* argv[]){
   HexTools tools;
   BinaryTools bTools;
 
-  const string FOOTER = "454E4454000000000000000000000000";
-
   if(argc < 2){
     cout << "Not enough arguments." << endl;
     cout << "USAGE: main fileToExtract" << endl;
@@ -32,7 +30,7 @@ int main(int argc, char* argv[]){
       if (inputFile.is_open())
       {
         size = inputFile.tellg();
-        cout << "== LUMINOUS ARC EXTRACTOR by Nex ==" << endl << endl;
+        cout << "== LUMINOUS ARC IEAR UNPACKER by Nex ==" << endl << endl;
         cout << "Iniciando la extracción..." << endl << endl;
 
         // Creamos un fichero de texto donde guardaremos todos los ficheros extraídos
