@@ -55,9 +55,8 @@ int main(int argc, char* argv[]){
           char header[offset];
           inputFile.seekg(0, ios::beg);
           inputFile.read(header, offset);
-          fileName = "Header";
 
-          bTools.createBinaryFile(folderName + "/" + to_string(block_number) + " - " + fileName,
+          bTools.createBinaryFile(folderName + "/" + to_string(block_number) + " - " + "Header",
           string(header, offset));
 
           block_number++;
@@ -65,20 +64,29 @@ int main(int argc, char* argv[]){
           uint32_t pointer_beg_block;
           uint32_t block_size;
 
+          // Creamos fichero para la guardar la tabla de punteros
+          ofstream pointer_table (folderName + "/" + to_string(block_number) + " - " +  "Pointer Table");
+          cout << folderName + "/" + to_string(block_number) + " - " +  "Pointer Table" << " creado correctamente." << endl << endl;
+
+          block_number++;
+
           while(offset != first_pointer){
+            cout << "Extrayendo bloque número " << to_string(block_number) << "..." << endl;
 
             // Almacenamos los 8 bytes del puntero del inicio del bloque
-
             inputFile.seekg(offset, ios::beg);
             inputFile.read (reinterpret_cast<char *>(&pointer_beg_block), sizeof(pointer_beg_block));
 
+            pointer_table.write(reinterpret_cast<char *>(&pointer_beg_block), sizeof(pointer_beg_block));
+            cout << "Guardado " << hex << pointer_beg_block << " en la tabla de punteros." << endl;
             offset += sizeof(pointer_beg_block);
 
             // Almacenamos los 8 bytes del tamaño de bloque
-
             inputFile.seekg(offset, ios::beg);
             inputFile.read (reinterpret_cast<char *>(&block_size), sizeof(block_size));
 
+            pointer_table.write(reinterpret_cast<char *>(&block_size), sizeof(block_size));
+            cout << "Guardado " << hex << block_size << " en la tabla de punteros." << endl;
             offset += sizeof(block_size);
 
             // Almacenamos el bloque
@@ -89,14 +97,14 @@ int main(int argc, char* argv[]){
             fileName = string(block, sizeof(uint32_t));
 
             // Guardamos bloque en fichero
-            cout << "Extrayendo bloque número " << to_string(block_number) << "..." << endl;
-
             bTools.createBinaryFile(folderName + "/" + to_string(block_number) + " - " + fileName,
             string(block, block_size));
 
             block_number++;
 
           } // while
+
+          pointer_table.close();
 
           // Guardamos el footer del fichero
           uint32_t pointer_beg_footer = pointer_beg_block+block_size;
