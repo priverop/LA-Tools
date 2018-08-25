@@ -1,5 +1,5 @@
-#include "HexTools.h"
-#include "BinaryTools.h"
+#include "../Tools/HexTools.h"
+#include "../Tools/BinaryTools.h"
 #include <iostream>
 #include <fstream>
 #include <stdio.h>
