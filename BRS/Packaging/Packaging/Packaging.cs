@@ -42,14 +42,33 @@ namespace Packaging
             writerHeader.Write(numberOfBlocks);
             headerStream.Dispose();
 
-            for (UInt64 i = 1; i < 2; i++){
-                UInt32 blockPointer = fileToUnpackReader.ReadUInt32();
-                UInt32 nextBlockPointer = fileToUnpackReader.ReadUInt32();
+            UInt32 blockPointer;
+            UInt32 nextBlockPointer = 0x00;
+
+            for (UInt64 i = 1; i <= numberOfBlocks; i++){
+
+                if (i == 1)
+                    blockPointer = fileToUnpackReader.ReadUInt32();
+                else
+                    blockPointer = nextBlockPointer;
+
+                nextBlockPointer = 0x00; // reset 
+
+                if (i == numberOfBlocks - 1)
+                    nextBlockPointer = (UInt32)fileToUnpackStream.Length;
+                else
+                    nextBlockPointer = fileToUnpackReader.ReadUInt32();
+
+                if(nextBlockPointer < blockPointer)
+                    nextBlockPointer = fileToUnpackReader.ReadUInt32();
+
                 UInt32 blockSize = nextBlockPointer - blockPointer;
 
+                fileToUnpackStream.PushCurrentPosition();
                 fileToUnpackStream.Seek(blockPointer);
                 byte[] block = new byte[blockSize];
                 fileToUnpackStream.Read(block, 0, checked((int)blockSize));
+                fileToUnpackStream.PopPosition();
 
                 DataStream blockStream = new DataStream(i + BLOCK_FILENAME, FileOpenMode.Write);
                 DataWriter blockWriter = new DataWriter(blockStream);
