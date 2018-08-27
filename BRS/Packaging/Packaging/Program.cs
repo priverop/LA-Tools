@@ -6,7 +6,30 @@ namespace Packaging
     {
         public static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            if(args.Length < 1 || args.Length > 2){
+                Console.Write("Wrong arguments.");
+                Console.WriteLine("Usage: Packaging -unpack <file1>");
+                Console.WriteLine("Usage: Packaging -pack");
+            } 
+            else{
+
+                Packaging p = new Packaging();
+                String error = "ok";
+
+                switch(args[0]){
+                    case "-unpack":
+                        error = p.Unpack(args[1]);
+                        break;
+
+                    case "-pack":
+                        //error = p.Pack();
+                        break;
+                }
+
+                if(error != "ok"){
+                    Console.Write(error);
+                }
+            }
         }
     }
 }
