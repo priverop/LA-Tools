@@ -9,8 +9,7 @@
             if (args.Length < 1 || args.Length > 2)
             {
                 Console.Write("Wrong arguments.");
-                Console.WriteLine("Usage: Packaging -unpack <file1>");
-                Console.WriteLine("Usage: Packaging -pack");
+                showUsage();
             } 
             else
             {
@@ -28,11 +27,21 @@
 
                     default:
                         Console.WriteLine("Wrong arguments.");
-                        Console.WriteLine("Usage: Packaging -unpack <file1>");
-                        Console.WriteLine("Usage: Packaging -pack");
+                        showUsage();
                         break;
                 }
             }
+        }
+
+        private static void showUsage(){
+            Console.WriteLine("Usage: Packaging -unpack <file1>");
+            Console.WriteLine("Usage: Packaging -pack");
+        }
+
+        private static void showCredits(){
+            Console.WriteLine("=========================");
+            Console.WriteLine("== BRS UNPACKER by Nex ==");
+            Console.WriteLine("=========================");
         }
     }
 }
