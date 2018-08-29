@@ -1,23 +1,16 @@
-﻿using System;
-using System.IO;
-using Yarhl.IO;
-
-namespace Packaging
+﻿namespace Packaging
 {
+    using System;
+    using System.IO;
+    using Yarhl.IO;
+
     public class Packaging
     {
         private const string HEADER_FILENAME = "0 - Header";
         private const string BLOCK_FILENAME = " - Block";
 
-        public Packaging()
+        public void Unpack(string fileToExtractName)
         {
-        }
-
-        /*
-         * Return Error
-        */
-
-        public string Unpack(string fileToExtractName){
 
             /*
              * Almaceno el Magid.
@@ -36,16 +29,18 @@ namespace Packaging
             DataStream headerStream = new DataStream(HEADER_FILENAME, FileOpenMode.Write);
             DataWriter writerHeader = new DataWriter(headerStream);
 
-            UInt32 magid = fileToUnpackReader.ReadUInt32();
-            UInt64 numberOfBlocks = fileToUnpackReader.ReadUInt64();
+            uint magid = fileToUnpackReader.ReadUInt32();
+            ulong numberOfBlocks = fileToUnpackReader.ReadUInt64();
 
             writerHeader.Write(magid);
             writerHeader.Write(numberOfBlocks);
 
             // Save the current position
             long currentPosition = fileToUnpackStream.Position;
+
             // Read first block pointer (where the pointer table ends)
-            UInt32 firstBlockPointer = fileToUnpackReader.ReadUInt32();
+            uint firstBlockPointer = fileToUnpackReader.ReadUInt32();
+
             // Return to previous position
             fileToUnpackStream.Position = currentPosition;
 
@@ -54,7 +49,6 @@ namespace Packaging
             // Save pointer table 
             byte[] pointerTable = new byte[pointerTableSize];
             fileToUnpackStream.Read(pointerTable, 0, (int)pointerTableSize);
-
             writerHeader.Write(pointerTable);
             headerStream.Dispose();
 
@@ -62,19 +56,17 @@ namespace Packaging
             fileToUnpackStream.Position = currentPosition;
 
             // The loop will finish when we reach the first non-block pointer byte
-            long endBlocksPosition = currentPosition + (((int)numberOfBlocks) * sizeof(Int32));
+            long endBlocksPosition = currentPosition + (((int)numberOfBlocks) * sizeof(int));
             fileToUnpackStream.Position = endBlocksPosition;
-            UInt32 endBlocks = fileToUnpackReader.ReadUInt32();
+            uint endBlocks = fileToUnpackReader.ReadUInt32();
             fileToUnpackStream.Position = currentPosition;
 
-            UInt32 blockPointer;
-            UInt32 nextBlockPointer = 0x00;
-            UInt32 fileSize = (UInt32)fileToUnpackStream.Length;
+            uint blockPointer;
+            uint nextBlockPointer = 0x00;
+            uint fileSize = (uint)fileToUnpackStream.Length;
             uint i = 1;
 
-            while (nextBlockPointer != fileSize)
-            {
-
+            while (nextBlockPointer != fileSize){
                 // First iteration
                 if (nextBlockPointer == 0x00)
                     blockPointer = fileToUnpackReader.ReadUInt32();
@@ -85,11 +77,13 @@ namespace Packaging
 
                 // Last iteration
                 if (nextBlockPointer == endBlocks)
+
                     // Read block until the end of the file
                     nextBlockPointer = fileSize;
 
-                UInt32 blockSize = nextBlockPointer - blockPointer;
+                uint blockSize = nextBlockPointer - blockPointer;
 
+                // Save current position, save block and return position
                 fileToUnpackStream.PushCurrentPosition();
                 fileToUnpackStream.Seek(blockPointer);
                 byte[] block = new byte[blockSize];
@@ -100,11 +94,8 @@ namespace Packaging
                 DataWriter blockWriter = new DataWriter(blockStream);
                 blockWriter.Write(block);
                 i++;
+
             }
-
-
-            return "ok";
-
         }
     }
 }
