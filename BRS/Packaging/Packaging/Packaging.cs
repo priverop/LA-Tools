@@ -32,6 +32,7 @@ namespace Packaging
 
             DataStream fileToUnpackStream = new DataStream(fileToExtractName, FileOpenMode.Read);
             DataReader fileToUnpackReader = new DataReader(fileToUnpackStream);
+
             DataStream headerStream = new DataStream(HEADER_FILENAME, FileOpenMode.Write);
             DataWriter writerHeader = new DataWriter(headerStream);
 
@@ -40,27 +41,52 @@ namespace Packaging
 
             writerHeader.Write(magid);
             writerHeader.Write(numberOfBlocks);
+
+            // Save the current position
+            long currentPosition = fileToUnpackStream.Position;
+            // Read first block pointer (where the pointer table ends)
+            UInt32 firstBlockPointer = fileToUnpackReader.ReadUInt32();
+            // Return to previous position
+            fileToUnpackStream.Position = currentPosition;
+
+            long pointerTableSize = firstBlockPointer - currentPosition;
+
+            // Save pointer table 
+            byte[] pointerTable = new byte[pointerTableSize];
+            fileToUnpackStream.Read(pointerTable, 0, (int)pointerTableSize);
+
+            writerHeader.Write(pointerTable);
             headerStream.Dispose();
+
+            // Return to previous position
+            fileToUnpackStream.Position = currentPosition;
+
+            // The loop will finish when we reach the first non-block pointer byte
+            long endBlocksPosition = currentPosition + (((int)numberOfBlocks) * sizeof(Int32));
+            fileToUnpackStream.Position = endBlocksPosition;
+            UInt32 endBlocks = fileToUnpackReader.ReadUInt32();
+            fileToUnpackStream.Position = currentPosition;
 
             UInt32 blockPointer;
             UInt32 nextBlockPointer = 0x00;
+            UInt32 fileSize = (UInt32)fileToUnpackStream.Length;
+            uint i = 1;
 
-            for (UInt64 i = 1; i <= numberOfBlocks; i++){
+            while (nextBlockPointer != fileSize)
+            {
 
-                if (i == 1)
+                // First iteration
+                if (nextBlockPointer == 0x00)
                     blockPointer = fileToUnpackReader.ReadUInt32();
                 else
                     blockPointer = nextBlockPointer;
+                    
+                nextBlockPointer = fileToUnpackReader.ReadUInt32();
 
-                nextBlockPointer = 0x00; // reset 
-
-                if (i == numberOfBlocks - 1)
-                    nextBlockPointer = (UInt32)fileToUnpackStream.Length;
-                else
-                    nextBlockPointer = fileToUnpackReader.ReadUInt32();
-
-                if(nextBlockPointer < blockPointer)
-                    nextBlockPointer = fileToUnpackReader.ReadUInt32();
+                // Last iteration
+                if (nextBlockPointer == endBlocks)
+                    // Read block until the end of the file
+                    nextBlockPointer = fileSize;
 
                 UInt32 blockSize = nextBlockPointer - blockPointer;
 
@@ -73,6 +99,7 @@ namespace Packaging
                 DataStream blockStream = new DataStream(i + BLOCK_FILENAME, FileOpenMode.Write);
                 DataWriter blockWriter = new DataWriter(blockStream);
                 blockWriter.Write(block);
+                i++;
             }
 
 
