@@ -66,7 +66,8 @@
             uint fileSize = (uint)fileToUnpackStream.Length;
             uint i = 1;
 
-            while (nextBlockPointer != fileSize){
+            while (nextBlockPointer != fileSize)
+            {
                 // First iteration
                 if (nextBlockPointer == 0x00)
                     blockPointer = fileToUnpackReader.ReadUInt32();

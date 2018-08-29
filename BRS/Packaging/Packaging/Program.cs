@@ -6,7 +6,7 @@
     {
         public static void Main(string[] args)
         {
-            if(args.Length < 1 || args.Length > 2)
+            if (args.Length < 1 || args.Length > 2)
             {
                 Console.Write("Wrong arguments.");
                 Console.WriteLine("Usage: Packaging -unpack <file1>");
@@ -14,7 +14,6 @@
             } 
             else
             {
-
                 Packaging p = new Packaging();
 
                 switch (args[0])
